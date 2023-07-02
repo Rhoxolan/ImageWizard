@@ -8,12 +8,12 @@ using SixLabors.ImageSharp.Advanced;
 
 namespace ImageWizard.Controllers
 {
-	[Route("api/[controller]")]
+	[Route("api/images")]
 	[ApiController]
 	public class ImagesController : ControllerBase
 	{
 		private readonly ImagesContext _context;
-		private IHttpClientFactory _clientFactory;
+		private readonly IHttpClientFactory _clientFactory;
 		private static readonly object _lock = new();
 
 		public ImagesController(ImagesContext context, IHttpClientFactory clientFactory)
@@ -22,8 +22,8 @@ namespace ImageWizard.Controllers
 			_clientFactory = clientFactory;
 		}
 
-		[HttpPost("upload-by-url")]
-		public async Task<IActionResult> UploadByUrl(ImageDTO imageDTO)
+		[HttpPost]
+		public async Task<IActionResult> PostImage(ImageDTO imageDTO)
 		{
 			try
 			{
@@ -71,8 +71,8 @@ namespace ImageWizard.Controllers
 			}
 		}
 
-		[HttpGet("get-url/{id}")]
-		public async Task<IActionResult> GetUrl(int id)
+		[HttpGet("{id}")]
+		public async Task<IActionResult> GetImage(int id)
 		{
 			try
 			{
@@ -103,8 +103,8 @@ namespace ImageWizard.Controllers
 			}
 		}
 
-		[HttpGet("get-url/{id}/size/{size:regex(^(100|300)$)}")]
-		public async Task<IActionResult> GetUrlThumbnail(int id, int size)
+		[HttpGet("{id}/size/{size:regex(^(100|300)$)}")]
+		public async Task<IActionResult> GetImageThumbnail(int id, int size)
 		{
 			//Another variant with manual check
 			//if (size != 100 && size != 300)
@@ -163,8 +163,8 @@ namespace ImageWizard.Controllers
 			}
 		}
 
-		[HttpDelete("remove/{id}")]
-		public async Task<IActionResult> Remove(int id)
+		[HttpDelete("{id}")]
+		public async Task<IActionResult> DeleteImage(int id)
 		{
 			var imageEntity = await _context.ImageEntities.FindAsync(id);
 			if (imageEntity == null)
