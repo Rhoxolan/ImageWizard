@@ -82,12 +82,7 @@ namespace ImageWizard.Controllers
 					return NotFound();
 				}
 				using Image image = Image.Load(imageEntity.Path);
-
-				//Another variant with image return
-				//
-				//	return PhysicalFile(imageEntity.Path, image.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
-				//
-				return Ok(new { url = GetImageUrl(imageEntity.Id) });
+				return PhysicalFile(imageEntity.Path, image.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
 			}
 			catch (InvalidImageContentException)
 			{
@@ -106,11 +101,6 @@ namespace ImageWizard.Controllers
 		[HttpGet("{id}/size/{size:regex(^(100|300)$)}")]
 		public async Task<IActionResult> GetImageThumbnail(int id, int size)
 		{
-			//Another variant with manual check
-			//if (size != 100 && size != 300)
-			//{
-			//	return BadRequest("The size for image thumbnail is not valid");
-			//}
 			try
 			{
 				var imageEntity = await _context.ImageEntities.FindAsync(id);
@@ -134,20 +124,10 @@ namespace ImageWizard.Controllers
 					{
 						imageThumbnail.Save(thumbnailFilePath);
 					}
-
-					//Another variant with image return
-					//
-					//	return PhysicalFile(thumbnailFilePath, imageThumbnail.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
-					//
-					return Ok(new { url = GetThumbnailImageUrl(imageEntity.Id, size) });
+					return PhysicalFile(thumbnailFilePath, imageThumbnail.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
 				}
 				using Image imageThumbnailed = Image.Load(thumbnailFilePath);
-
-				//Another variant with image return
-				//
-				//	return PhysicalFile(thumbnailFilePath, imageThumbnailed.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
-				//
-				return Ok(new { url = GetThumbnailImageUrl(imageEntity.Id, size) });
+				return PhysicalFile(thumbnailFilePath, imageThumbnailed.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
 			}
 			catch (InvalidImageContentException)
 			{
