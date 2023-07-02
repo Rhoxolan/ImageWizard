@@ -1,6 +1,7 @@
 ﻿using ImageWizard.Data.Contexts;
 using ImageWizard.Data.Entities;
 using ImageWizard.DTOs.ImagesDTOs;
+using ImageWizard.Filters.ImagesFilters;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
@@ -23,15 +24,11 @@ namespace ImageWizard.Controllers
 		}
 
 		[HttpPost]
+		[WellFormedUriStringActionFilter]
 		public async Task<IActionResult> PostImage(ImageDTO imageDTO)
 		{
 			try
 			{
-				if (!Uri.IsWellFormedUriString(imageDTO.Url, UriKind.Absolute))
-				{
-					//Return code 400 because the request isn`t valid
-					return BadRequest("Wrong URI");
-				}
 				var imageUri = new Uri(imageDTO.Url);
 				var _httpClient = _clientFactory.CreateClient();
 				byte[] imageBytes = await _httpClient.GetByteArrayAsync(imageUri);
