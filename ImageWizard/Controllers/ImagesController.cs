@@ -64,7 +64,7 @@ namespace ImageWizard.Controllers
 			catch
 			{
 				//Return code 400 because an error occurred while processing the data.
-				return BadRequest("Data processing error. Please contact to developer");
+				return Problem("Data processing error. Please contact to developer");
 			}
 		}
 
