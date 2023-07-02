@@ -1,0 +1,25 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.33530.505
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ImageWizard", "ImageWizard\ImageWizard.csproj", "{643958B5-F5FF-482A-A5D7-5CB5C30C93C6}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{643958B5-F5FF-482A-A5D7-5CB5C30C93C6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{643958B5-F5FF-482A-A5D7-5CB5C30C93C6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{643958B5-F5FF-482A-A5D7-5CB5C30C93C6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{643958B5-F5FF-482A-A5D7-5CB5C30C93C6}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7132C909-EEF2-4048-BFF8-3FF9F7F171E3}
+	EndGlobalSection
+EndGlobal
