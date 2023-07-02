@@ -8,13 +8,19 @@ namespace ImageWizard.Filters.ImagesFilters
 	{
 		public override void OnActionExecuting(ActionExecutingContext context)
 		{
-			if (context.ActionArguments.TryGetValue("imageDTO", out var imageDTO))
+			var imageDTO = (ImageDTO)context.ActionArguments["imageDTO"]!;
+			if (!Uri.IsWellFormedUriString(imageDTO.Url, UriKind.Absolute))
 			{
-				if (!Uri.IsWellFormedUriString(((ImageDTO)imageDTO!).Url, UriKind.Absolute))
-				{
-					context.Result = new BadRequestObjectResult("Wrong URI");
-				}
+				context.Result = new BadRequestObjectResult("Wrong URI");
 			}
+
+			//if (context.ActionArguments.TryGetValue("imageDTO", out var imageDTO))
+			//{
+			//	if (!Uri.IsWellFormedUriString(((ImageDTO)imageDTO!).Url, UriKind.Absolute))
+			//	{
+			//		context.Result = new BadRequestObjectResult("Wrong URI");
+			//	}
+			//}
 		}
 	}
 }
