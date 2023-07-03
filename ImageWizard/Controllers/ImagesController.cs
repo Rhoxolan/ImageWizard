@@ -1,7 +1,8 @@
 ﻿using ImageWizard.Data.Contexts;
-using ImageWizard.Data.Entities;
 using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Filters.ImagesFilters;
+using ImageWizard.Services.ImagesServices.GetImageUrlService;
+using ImageWizard.Services.ImagesServices.SaveImageService;
 using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -17,11 +18,16 @@ namespace ImageWizard.Controllers
 		private readonly ImagesContext _context;
 		private static readonly object _lock = new();
 		private readonly IUploadFromUrlImageService _uploadFromUrlImageService;
+		private readonly ISaveImageService _saveImageService;
+		private readonly IGetImageUrlService _getImageUrlService;
 
-		public ImagesController(ImagesContext context, IUploadFromUrlImageService uploadFromUrlImageService)
+		public ImagesController(ImagesContext context, IUploadFromUrlImageService uploadFromUrlImageService,
+			ISaveImageService saveImageService, IGetImageUrlService getImageUrlService)
 		{
 			_context = context;
 			_uploadFromUrlImageService = uploadFromUrlImageService;
+			_saveImageService = saveImageService;
+			_getImageUrlService = getImageUrlService;
 		}
 
 		[HttpPost]
@@ -33,36 +39,17 @@ namespace ImageWizard.Controllers
 				var imageBytes = await _uploadFromUrlImageService.GetImageBytesAsync(imageDTO);
 				if (imageBytes.Length > (5 * 1024 * 1024))
 				{
-					//Return code 422 because the request is valid but the
-					//server cannot process it because the image is too large
 					return UnprocessableEntity("The size of the image is bigger than 5MB");
 				}
-				var format = Image.DetectFormat(imageBytes);
-				using Image image = Image.Load(imageBytes);
-				string imageDirectory = GetNewImageDirectoryName();
-				string imageName = $"{Guid.NewGuid()}.{format.Name.ToLower()}";
-				string imagePath = Path.Combine(imageDirectory, imageName);
-				lock (_lock)
-				{
-					Directory.CreateDirectory(imageDirectory);
-					image.Save(imagePath);
-				}
-				ImageEntity imageEntity = new ImageEntity
-				{
-					Path = imagePath
-				};
-				_context.ImageEntities.Add(imageEntity);
-				await _context.SaveChangesAsync();
-				return Ok(new { url = GetImageUrl(imageEntity.Id) });
+				int id = await _saveImageService.SaveImageAsync(imageBytes);
+				return Ok(new { url = _getImageUrlService.GetImageUrl(id, Request.Scheme, Request.Host) });
 			}
 			catch (UnknownImageFormatException)
 			{
-				//Return code 422 because the request is valid but the content type is not valid
 				return UnprocessableEntity("The image format error");
 			}
 			catch
 			{
-				//Return code 500 because an error occurred while processing the data.
 				return Problem("Data processing error. Please contact to developer");
 			}
 		}
@@ -171,29 +158,6 @@ namespace ImageWizard.Controllers
 			_context.ImageEntities.Remove(imageEntity);
 			await _context.SaveChangesAsync();
 			return Ok();
-		}
-
-		private string GetThumbnailImageUrl(int id, int size)
-		{
-			return $"{Request.Scheme}://{Request.Host}/api/images/get-url/{id}/size/{size}";
-		}
-
-		private string GetImageUrl(int id)
-		{
-			return $"{Request.Scheme}://{Request.Host}/api/images/get-url/{id}";
-		}
-
-		private string GetNewImageDirectoryName()
-		{
-			return Path.Combine(Directory.GetCurrentDirectory(), "Images",
-				$"{GetRandomLetter()}{GetRandomLetter()}", $"{GetRandomLetter()}{GetRandomLetter()}");
-		}
-
-		private string GetRandomLetter()
-		{
-			const string letters = "qwertyuiopasdfghjklzxcvbnm";
-			var rand = new Random();
-			return letters[rand.Next(letters.Length)].ToString();
 		}
 	}
 }

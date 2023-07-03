@@ -1,4 +1,7 @@
 using ImageWizard.Data.Contexts;
+using ImageWizard.Services.ImagesServices.GetImageUrlService;
+using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
+using ImageWizard.Services.ImagesServices.SaveImageService;
 using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,7 +15,10 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer()
 	.AddHttpClient()
 	.AddSwaggerGen()
-	.AddTransient<IUploadFromUrlImageService, UploadFromUrlImageService>();
+	.AddTransient<IUploadFromUrlImageService, UploadFromUrlImageService>()
+	.AddSingleton<IImagesFileWorkerService, ImagesFileWorkerService>()
+	.AddTransient<ISaveImageService, SaveImageService>()
+	.AddTransient<IGetImageUrlService, GetImageUrlService>();
 
 var app = builder.Build();
 
