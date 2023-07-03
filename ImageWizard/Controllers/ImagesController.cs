@@ -85,31 +85,13 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var imageEntity = await _context.ImageEntities.FindAsync(id);
+				var imageEntity = await _imageService.GetImageEntityAsync(id);
 				if (imageEntity == null)
 				{
 					return NotFound();
 				}
-				if (!System.IO.File.Exists(imageEntity.Path))
-				{
-					return Problem("Data processing error. Please contact to developer");
-				}
-				string folderPath = Path.GetDirectoryName(imageEntity.Path)!;
-				string mainFileNameWithoutExtension = Path.GetFileNameWithoutExtension(imageEntity.Path)!;
-				string mainFileNameExtension = Path.GetExtension(imageEntity.Path)!.ToLower();
-				string thumbnailFilePath = Path.Combine(folderPath, $"{mainFileNameWithoutExtension}-{size}{mainFileNameExtension}");
-				if (!System.IO.File.Exists(thumbnailFilePath))
-				{
-					using Image image = Image.Load(imageEntity.Path);
-					using Image imageThumbnail = image.Clone(i => i.Resize(size, size));
-					lock (_lock)
-					{
-						imageThumbnail.Save(thumbnailFilePath);
-					}
-					return PhysicalFile(thumbnailFilePath, imageThumbnail.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
-				}
-				using Image imageThumbnailed = Image.Load(thumbnailFilePath);
-				return PhysicalFile(thumbnailFilePath, imageThumbnailed.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
+				string thumbnailFilePath = _imageService.GetImageThumbnailFilePath(imageEntity, size);
+				return PhysicalFile(thumbnailFilePath, _imageService.GetImageFormat(thumbnailFilePath) ?? "img/*");
 			}
 			catch (InvalidImageContentException)
 			{

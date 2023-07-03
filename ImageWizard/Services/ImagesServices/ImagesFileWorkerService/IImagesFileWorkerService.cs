@@ -2,6 +2,8 @@
 {
 	public interface IImagesFileWorkerService
 	{
-		public void SaveImage(string imageDirectory, string imagePath, Image image);
+		void SaveImage(string imageDirectory, string imagePath, Image image);
+
+		void SaveImageThumbnail(string imagePath, Image image);
 	}
 }

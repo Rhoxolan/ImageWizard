@@ -12,5 +12,13 @@
 				image.Save(imagePath);
 			}
 		}
+
+		public void SaveImageThumbnail(string imagePath, Image image)
+		{
+			lock (_lock)
+			{
+				image.Save(imagePath);
+			}
+		}
 	}
 }

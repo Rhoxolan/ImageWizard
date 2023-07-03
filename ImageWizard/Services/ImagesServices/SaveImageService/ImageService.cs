@@ -37,6 +37,21 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			return await _context.ImageEntities.FindAsync(id);
 		}
 
+		public string GetImageThumbnailFilePath(ImageEntity imageEntity, int size)
+		{
+			string folderPath = Path.GetDirectoryName(imageEntity.Path)!;
+			string mainFileNameWithoutExtension = Path.GetFileNameWithoutExtension(imageEntity.Path)!;
+			string mainFileNameExtension = Path.GetExtension(imageEntity.Path)!.ToLower();
+			string thumbnailFilePath = Path.Combine(folderPath, $"{mainFileNameWithoutExtension}-{size}{mainFileNameExtension}");
+			if (!File.Exists(thumbnailFilePath))
+			{
+				using Image image = Image.Load(imageEntity.Path);
+				using Image imageThumbnail = image.Clone(i => i.Resize(size, size));
+				_imagesFileWorkerService.SaveImageThumbnail(thumbnailFilePath, imageThumbnail);
+			}
+			return thumbnailFilePath;
+		}
+
 		public string? GetImageFormat(string path)
 		{
 			using Image image = Image.Load(path);

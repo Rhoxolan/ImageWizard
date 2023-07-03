@@ -8,6 +8,8 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 
 		Task<ImageEntity?> GetImageEntityAsync(int id);
 
+		string GetImageThumbnailFilePath(ImageEntity imageEntity, int size);
+
 		string? GetImageFormat(string path);
 	}
 }
