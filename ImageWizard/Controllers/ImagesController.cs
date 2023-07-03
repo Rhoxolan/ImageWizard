@@ -18,15 +18,15 @@ namespace ImageWizard.Controllers
 		private readonly ImagesContext _context;
 		private static readonly object _lock = new();
 		private readonly IUploadFromUrlImageService _uploadFromUrlImageService;
-		private readonly ISaveImageService _saveImageService;
+		private readonly IImageService _imageService;
 		private readonly IGetImageUrlService _getImageUrlService;
 
 		public ImagesController(ImagesContext context, IUploadFromUrlImageService uploadFromUrlImageService,
-			ISaveImageService saveImageService, IGetImageUrlService getImageUrlService)
+			IImageService imageService, IGetImageUrlService getImageUrlService)
 		{
 			_context = context;
 			_uploadFromUrlImageService = uploadFromUrlImageService;
-			_saveImageService = saveImageService;
+			_imageService = imageService;
 			_getImageUrlService = getImageUrlService;
 		}
 
@@ -41,7 +41,7 @@ namespace ImageWizard.Controllers
 				{
 					return UnprocessableEntity("The size of the image is bigger than 5MB");
 				}
-				int id = await _saveImageService.SaveImageAsync(imageBytes);
+				int id = await _imageService.SaveImageAsync(imageBytes);
 				return Ok(new { url = _getImageUrlService.GetImageUrl(id, Request.Scheme, Request.Host) });
 			}
 			catch (UnknownImageFormatException)
@@ -59,13 +59,12 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var imageEntity = await _context.ImageEntities.FindAsync(id);
+				var imageEntity = await _imageService.GetImageEntityAsync(id);
 				if (imageEntity == null)
 				{
 					return NotFound();
 				}
-				using Image image = Image.Load(imageEntity.Path);
-				return PhysicalFile(imageEntity.Path, image.Metadata.DecodedImageFormat?.DefaultMimeType ?? "img/*");
+				return PhysicalFile(imageEntity.Path, _imageService.GetImageFormat(imageEntity.Path) ?? "img/*");
 			}
 			catch (InvalidImageContentException)
 			{

@@ -4,12 +4,12 @@ using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
 
 namespace ImageWizard.Services.ImagesServices.SaveImageService
 {
-	public class SaveImageService : ISaveImageService
+	public class ImageService : IImageService
 	{
 		private readonly IImagesFileWorkerService _imagesFileWorkerService;
 		private readonly ImagesContext _context;
 
-		public SaveImageService(IImagesFileWorkerService imagesFileWorkerService, ImagesContext context)
+		public ImageService(IImagesFileWorkerService imagesFileWorkerService, ImagesContext context)
 		{
 			_imagesFileWorkerService = imagesFileWorkerService;
 			_context = context;
@@ -30,6 +30,17 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			_context.ImageEntities.Add(imageEntity);
 			await _context.SaveChangesAsync();
 			return imageEntity.Id;
+		}
+
+		public async Task<ImageEntity?> GetImageEntityAsync(int id)
+		{
+			return await _context.ImageEntities.FindAsync(id);
+		}
+
+		public string? GetImageFormat(string path)
+		{
+			using Image image = Image.Load(path);
+			return image.Metadata.DecodedImageFormat?.DefaultMimeType;
 		}
 
 		private string GetNewImageDirectoryName()

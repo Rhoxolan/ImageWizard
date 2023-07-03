@@ -17,7 +17,7 @@ builder.Services.AddEndpointsApiExplorer()
 	.AddSwaggerGen()
 	.AddTransient<IUploadFromUrlImageService, UploadFromUrlImageService>()
 	.AddSingleton<IImagesFileWorkerService, ImagesFileWorkerService>()
-	.AddTransient<ISaveImageService, SaveImageService>()
+	.AddTransient<IImageService, ImageService>()
 	.AddTransient<IGetImageUrlService, GetImageUrlService>();
 
 var app = builder.Build();
