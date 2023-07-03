@@ -2,6 +2,7 @@
 using ImageWizard.Data.Entities;
 using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Filters.ImagesFilters;
+using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SixLabors.ImageSharp;
@@ -14,13 +15,13 @@ namespace ImageWizard.Controllers
 	public class ImagesController : ControllerBase
 	{
 		private readonly ImagesContext _context;
-		private readonly IHttpClientFactory _clientFactory;
 		private static readonly object _lock = new();
+		private readonly IUploadFromUrlImageService _uploadFromUrlImageService;
 
-		public ImagesController(ImagesContext context, IHttpClientFactory clientFactory)
+		public ImagesController(ImagesContext context, IUploadFromUrlImageService uploadFromUrlImageService)
 		{
 			_context = context;
-			_clientFactory = clientFactory;
+			_uploadFromUrlImageService = uploadFromUrlImageService;
 		}
 
 		[HttpPost]
@@ -29,9 +30,7 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var imageUri = new Uri(imageDTO.Url);
-				var _httpClient = _clientFactory.CreateClient();
-				byte[] imageBytes = await _httpClient.GetByteArrayAsync(imageUri);
+				var imageBytes = await _uploadFromUrlImageService.GetImageBytesAsync(imageDTO);
 				if (imageBytes.Length > (5 * 1024 * 1024))
 				{
 					//Return code 422 because the request is valid but the
@@ -63,7 +62,7 @@ namespace ImageWizard.Controllers
 			}
 			catch
 			{
-				//Return code 400 because an error occurred while processing the data.
+				//Return code 500 because an error occurred while processing the data.
 				return Problem("Data processing error. Please contact to developer");
 			}
 		}

@@ -1,4 +1,5 @@
 using ImageWizard.Data.Contexts;
+using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -10,7 +11,8 @@ builder.Services.AddControllers();
 
 builder.Services.AddEndpointsApiExplorer()
 	.AddHttpClient()
-	.AddSwaggerGen();
+	.AddSwaggerGen()
+	.AddTransient<IUploadFromUrlImageService, UploadFromUrlImageService>();
 
 var app = builder.Build();
 
