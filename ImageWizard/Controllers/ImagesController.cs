@@ -4,9 +4,6 @@ using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
 using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Advanced;
 
 namespace ImageWizard.Controllers
 {
