@@ -1,5 +1,6 @@
 ﻿using ImageWizard.Data.Contexts;
 using ImageWizard.Data.Entities;
+using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
 
 namespace ImageWizard.Services.ImagesServices.SaveImageService
@@ -32,13 +33,28 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			return imageEntity.Id;
 		}
 
-		public async Task<ImageEntity?> GetImageEntityAsync(int id)
+		public async Task<LocalImageDTO?> GetLocalImageAsync(int id)
 		{
-			return await _context.ImageEntities.FindAsync(id);
+			var imageEntity = await _context.ImageEntities.FindAsync(id);
+			if (imageEntity == null)
+			{
+				return null;
+			}
+			using Image image = Image.Load(imageEntity.Path);
+			return new LocalImageDTO
+			{
+				Path = imageEntity.Path,
+				Format = image.Metadata.DecodedImageFormat?.DefaultMimeType
+			};
 		}
 
-		public string GetImageThumbnailFilePath(ImageEntity imageEntity, int size)
+		public async Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size)
 		{
+			var imageEntity = await _context.ImageEntities.FindAsync(id);
+			if (imageEntity == null)
+			{
+				return null;
+			}
 			string folderPath = Path.GetDirectoryName(imageEntity.Path)!;
 			string mainFileNameWithoutExtension = Path.GetFileNameWithoutExtension(imageEntity.Path)!;
 			string mainFileNameExtension = Path.GetExtension(imageEntity.Path)!.ToLower();
@@ -48,14 +64,18 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 				using Image image = Image.Load(imageEntity.Path);
 				using Image imageThumbnail = image.Clone(i => i.Resize(size, size));
 				_imagesFileWorkerService.SaveImageThumbnail(thumbnailFilePath, imageThumbnail);
+				return new LocalImageDTO
+				{
+					Path = thumbnailFilePath,
+					Format = imageThumbnail.Metadata.DecodedImageFormat?.DefaultMimeType
+				};
 			}
-			return thumbnailFilePath;
-		}
-
-		public string? GetImageFormat(string path)
-		{
-			using Image image = Image.Load(path);
-			return image.Metadata.DecodedImageFormat?.DefaultMimeType;
+			using Image localImageThumbnail = Image.Load(thumbnailFilePath);
+			return new LocalImageDTO
+			{
+				Path = thumbnailFilePath,
+				Format = localImageThumbnail.Metadata.DecodedImageFormat?.DefaultMimeType
+			};
 		}
 
 		private string GetNewImageDirectoryName()

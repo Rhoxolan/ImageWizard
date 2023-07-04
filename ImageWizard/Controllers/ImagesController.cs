@@ -59,12 +59,12 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var imageEntity = await _imageService.GetImageEntityAsync(id);
-				if (imageEntity == null)
+				var localImage = await _imageService.GetLocalImageAsync(id);
+				if (localImage == null)
 				{
 					return NotFound();
 				}
-				return PhysicalFile(imageEntity.Path, _imageService.GetImageFormat(imageEntity.Path) ?? "img/*");
+				return PhysicalFile(localImage.Path, localImage.Format ?? "img/*");
 			}
 			catch (InvalidImageContentException)
 			{
@@ -85,13 +85,12 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var imageEntity = await _imageService.GetImageEntityAsync(id);
-				if (imageEntity == null)
+				var localImageThumbnail = await _imageService.GetLocalImageThumbnailAsync(id, size);
+				if (localImageThumbnail == null)
 				{
 					return NotFound();
 				}
-				string thumbnailFilePath = _imageService.GetImageThumbnailFilePath(imageEntity, size);
-				return PhysicalFile(thumbnailFilePath, _imageService.GetImageFormat(thumbnailFilePath) ?? "img/*");
+				return PhysicalFile(localImageThumbnail.Path, localImageThumbnail.Format ?? "img/*");
 			}
 			catch (InvalidImageContentException)
 			{

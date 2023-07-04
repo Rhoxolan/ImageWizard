@@ -1,4 +1,5 @@
 ﻿using ImageWizard.Data.Entities;
+using ImageWizard.DTOs.ImagesDTOs;
 
 namespace ImageWizard.Services.ImagesServices.SaveImageService
 {
@@ -6,10 +7,8 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 	{
 		Task<int> SaveImageAsync(byte[] imageBytes);
 
-		Task<ImageEntity?> GetImageEntityAsync(int id);
+		Task<LocalImageDTO?> GetLocalImageAsync(int id);
 
-		string GetImageThumbnailFilePath(ImageEntity imageEntity, int size);
-
-		string? GetImageFormat(string path);
+		Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size);
 	}
 }
