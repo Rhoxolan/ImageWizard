@@ -1,4 +1,6 @@
-﻿namespace ImageWizard.Services.ImagesServices.ImagesFileWorkerService
+﻿using ImageWizard.Data.Entities;
+
+namespace ImageWizard.Services.ImagesServices.ImagesFileWorkerService
 {
 	public class ImagesFileWorkerService : IImagesFileWorkerService
 	{
@@ -18,6 +20,21 @@
 			lock (_lock)
 			{
 				image.Save(imagePath);
+			}
+		}
+
+		public void DeleteImage(string filepath, params string[] thumbnailPathes)
+		{
+			lock (_lock)
+			{
+				File.Delete(filepath);
+				foreach(var thumbnailPath in thumbnailPathes)
+				{
+					if (File.Exists(thumbnailPath))
+					{
+						File.Delete(thumbnailPath);
+					}
+				}
 			}
 		}
 	}

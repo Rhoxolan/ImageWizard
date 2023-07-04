@@ -1,5 +1,4 @@
-﻿using ImageWizard.Data.Contexts;
-using ImageWizard.DTOs.ImagesDTOs;
+﻿using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
@@ -15,16 +14,13 @@ namespace ImageWizard.Controllers
 	[ApiController]
 	public class ImagesController : ControllerBase
 	{
-		private readonly ImagesContext _context;
-		private static readonly object _lock = new();
 		private readonly IUploadFromUrlImageService _uploadFromUrlImageService;
 		private readonly IImageService _imageService;
 		private readonly IGetImageUrlService _getImageUrlService;
 
-		public ImagesController(ImagesContext context, IUploadFromUrlImageService uploadFromUrlImageService,
-			IImageService imageService, IGetImageUrlService getImageUrlService)
+		public ImagesController(IUploadFromUrlImageService uploadFromUrlImageService, IImageService imageService,
+			IGetImageUrlService getImageUrlService)
 		{
-			_context = context;
 			_uploadFromUrlImageService = uploadFromUrlImageService;
 			_imageService = imageService;
 			_getImageUrlService = getImageUrlService;
@@ -109,35 +105,20 @@ namespace ImageWizard.Controllers
 		[HttpDelete("{id}")]
 		public async Task<IActionResult> DeleteImage(int id)
 		{
-			var imageEntity = await _context.ImageEntities.FindAsync(id);
-			if (imageEntity == null)
+			try
 			{
-				return NotFound();
+				var imageEntity = await _imageService.GetImageEntityAsync(id);
+				if (imageEntity == null)
+				{
+					return NotFound();
+				}
+				await _imageService.DeleteImageAsync(imageEntity);
+				return Ok();
 			}
-			string folderPath = Path.GetDirectoryName(imageEntity.Path)!;
-			string mainFileNameWithoutExtension = Path.GetFileNameWithoutExtension(imageEntity.Path)!;
-			string mainFileNameExtension = Path.GetExtension(imageEntity.Path)!.ToLower();
-			string thumbnail100FilePath = Path.Combine(folderPath, $"{mainFileNameWithoutExtension}-100{mainFileNameExtension}");
-			string thumbnail300FilePath = Path.Combine(folderPath, $"{mainFileNameWithoutExtension}-300{mainFileNameExtension}");
-			if (!System.IO.File.Exists(imageEntity.Path))
+			catch
 			{
 				return Problem("Data processing error. Please contact to developer");
 			}
-			lock (_lock)
-			{
-				System.IO.File.Delete(imageEntity.Path);
-				if (System.IO.File.Exists(thumbnail100FilePath))
-				{
-					System.IO.File.Delete(thumbnail100FilePath);
-				}
-				if (System.IO.File.Exists(thumbnail300FilePath))
-				{
-					System.IO.File.Delete(thumbnail300FilePath);
-				}
-			}
-			_context.ImageEntities.Remove(imageEntity);
-			await _context.SaveChangesAsync();
-			return Ok();
 		}
 	}
 }

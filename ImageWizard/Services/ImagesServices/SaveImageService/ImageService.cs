@@ -78,6 +78,23 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			};
 		}
 
+		public async Task DeleteImageAsync(ImageEntity imageEntity)
+		{
+			string folderPath = Path.GetDirectoryName(imageEntity.Path)!;
+			string mainFileNameWithoutExtension = Path.GetFileNameWithoutExtension(imageEntity.Path)!;
+			string mainFileNameExtension = Path.GetExtension(imageEntity.Path)!.ToLower();
+			string thumbnail100FilePath = Path.Combine(folderPath, $"{mainFileNameWithoutExtension}-100{mainFileNameExtension}");
+			string thumbnail300FilePath = Path.Combine(folderPath, $"{mainFileNameWithoutExtension}-300{mainFileNameExtension}");
+			_imagesFileWorkerService.DeleteImage(imageEntity.Path, thumbnail100FilePath, thumbnail300FilePath);
+			_context.ImageEntities.Remove(imageEntity);
+			await _context.SaveChangesAsync();
+		}
+
+		public async Task<ImageEntity?> GetImageEntityAsync(int id)
+		{
+			return await _context.ImageEntities.FindAsync(id);
+		}
+
 		private string GetNewImageDirectoryName()
 		{
 			return Path.Combine(Directory.GetCurrentDirectory(), "Images",
