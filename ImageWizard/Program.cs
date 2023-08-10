@@ -8,28 +8,33 @@ using Microsoft.EntityFrameworkCore;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddDbContext<ImagesContext>(opt
-	=> opt.UseSqlServer(builder.Configuration.GetConnectionString("ImagesDB")));
+    => opt.UseSqlServer(builder.Configuration.GetConnectionString("ImagesDB")));
 
 builder.Services.AddControllers();
 
+builder.Services.AddCors(opt =>
+    opt.AddDefaultPolicy(builder =>
+    builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
 builder.Services.AddEndpointsApiExplorer()
-	.AddHttpClient()
-	.AddSwaggerGen()
-	.AddTransient<IUploadFromUrlImageService, UploadFromUrlImageService>()
-	.AddSingleton<IImagesFileWorkerService, ImagesFileWorkerService>()
-	.AddTransient<IImageService, ImageService>()
-	.AddTransient<IGetImageUrlService, GetImageUrlService>();
+    .AddHttpClient()
+    .AddSwaggerGen()
+    .AddTransient<IUploadFromUrlImageService, UploadFromUrlImageService>()
+    .AddSingleton<IImagesFileWorkerService, ImagesFileWorkerService>()
+    .AddTransient<IImageService, ImageService>()
+    .AddTransient<IGetImageUrlService, GetImageUrlService>();
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-	app.UseSwagger();
-	app.UseSwaggerUI();
+    app.UseSwagger();
+    app.UseSwaggerUI();
 }
 
 app.UseHttpsRedirection();
 app.UseAuthorization();
+app.UseCors();
 
 app.MapControllers();
 
