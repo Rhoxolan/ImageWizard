@@ -3,6 +3,7 @@ using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
 using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -15,6 +16,9 @@ builder.Services.AddControllers();
 builder.Services.AddCors(opt =>
     opt.AddDefaultPolicy(builder =>
     builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
+
+builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+	.AddEntityFrameworkStores<ImagesContext>();
 
 builder.Services.AddEndpointsApiExplorer()
     .AddHttpClient()
