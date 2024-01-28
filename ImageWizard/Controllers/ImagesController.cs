@@ -29,7 +29,7 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var imageBytes = await _uploadFromUrlImageService.GetImageBytesAsync(imageDTO);
+				var imageBytes = await _uploadFromUrlImageService.GetImageBytesAsync(imageDTO); //Идея для рефакторинга - перенести проверку в сервис, а массив байт передавать через контекст или что-то в этом роде
 				if (imageBytes.Length > (5 * 1024 * 1024))
 				{
 					return UnprocessableEntity("The size of the image is bigger than 5MB");

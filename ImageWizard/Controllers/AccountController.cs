@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ImageWizard.DTOs.AccountDTOs;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImageWizard.Controllers
@@ -14,14 +15,21 @@ namespace ImageWizard.Controllers
 			_userManager = userManager;
 		}
 
-		[HttpPost("register")]
-		public async Task<IActionResult> Register()
+		[HttpPost("register")] //Идея для рефакторинга - подумать над тем, чтобы усложнить систему передачи пароля, мб как-то зашифровать передаваемый пароль
+		[ValidateAntiForgeryToken]
+		public async Task<IActionResult> Register(AccountDTO accountDTO)
 		{
+			var user = new IdentityUser{ UserName = accountDTO.Login };
+			var createResult = await _userManager.CreateAsync(user, accountDTO.Password);
+			if (!createResult.Succeeded)
+			{
+				return BadRequest(new { Errors = createResult.Errors });
+			}
 			throw new NotImplementedException();
 		}
 
 		[HttpPost("login")]
-		public async Task<IActionResult> Login()
+		public async Task<IActionResult> Login(AccountDTO accountDTO)
 		{
 			throw new NotImplementedException();
 		}
