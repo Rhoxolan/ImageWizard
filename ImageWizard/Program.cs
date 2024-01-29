@@ -3,6 +3,7 @@ using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
 using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
+using ImageWizard.Services.JWTService;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -47,7 +48,8 @@ builder.Services.AddEndpointsApiExplorer()
 	.AddTransient<IUploadFromUrlImageService, UploadFromUrlImageService>()
 	.AddSingleton<IImagesFileWorkerService, ImagesFileWorkerService>()
 	.AddTransient<IImageService, ImageService>()
-	.AddTransient<IGetImageUrlService, GetImageUrlService>();
+	.AddTransient<IGetImageUrlService, GetImageUrlService>()
+	.AddTransient<IJWTService, JWTService>();
 
 var app = builder.Build();
 
