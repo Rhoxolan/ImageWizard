@@ -7,7 +7,7 @@ namespace ImageWizard.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class AccountController : ControllerBase
+	public class AccountController : ControllerBase //Добавить обработку ошибок, по примеру ImagesController-а
 	{
 		private readonly UserManager<IdentityUser> _userManager;
 		private readonly IJWTService _JWTService;
@@ -31,13 +31,19 @@ namespace ImageWizard.Controllers
 			{
 				return BadRequest(new { Errors = createResult.Errors });
 			}
-			return Ok(new { token = _JWTService.GenerateJWTToken(user) });
+			return Ok(new { token = _JWTService.GenerateJWTToken(user) }); //Идея для рефакторинга - перенести генерацию токена в фильтр. Возможно, тут возвращяем ОК, а в фильтре - добавляем данные
 		}
 
 		[HttpPost("login")]
+		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Login(AccountDTO accountDTO)
 		{
-			throw new NotImplementedException();
+			var user = await _userManager.FindByNameAsync(accountDTO.Login);
+			if (user == null || await _userManager.CheckPasswordAsync(user, accountDTO.Password))
+			{
+				return Unauthorized();
+			}
+			return Ok(new { token = _JWTService.GenerateJWTToken(user) });
 		}
 	}
 }
