@@ -7,7 +7,7 @@ namespace ImageWizard.Controllers
 {
 	[Route("api/[controller]")]
 	[ApiController]
-	public class AccountController : ControllerBase //Добавить обработку ошибок, по примеру ImagesController-а
+	public class AccountController : ControllerBase
 	{
 		private readonly UserManager<IdentityUser> _userManager;
 		private readonly IJWTService _JWTService;
@@ -22,28 +22,42 @@ namespace ImageWizard.Controllers
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Register(AccountDTO accountDTO)
 		{
-			var user = new IdentityUser
+			try
 			{
-				UserName = accountDTO.Login
-			};
-			var createResult = await _userManager.CreateAsync(user, accountDTO.Password);
-			if (!createResult.Succeeded)
-			{
-				return BadRequest(new { Errors = createResult.Errors });
+				var user = new IdentityUser
+				{
+					UserName = accountDTO.Login
+				};
+				var createResult = await _userManager.CreateAsync(user, accountDTO.Password);
+				if (!createResult.Succeeded)
+				{
+					return BadRequest(new { Errors = createResult.Errors });
+				}
+				return Ok(new { token = _JWTService.GenerateJWTToken(user) });
 			}
-			return Ok(new { token = _JWTService.GenerateJWTToken(user) }); //Идея для рефакторинга - перенести генерацию токена в фильтр. Возможно, тут возвращяем ОК, а в фильтре - добавляем данные
+			catch
+			{
+				return Problem("Error. Please contact to developer");
+			}
 		}
 
 		[HttpPost("login")]
 		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Login(AccountDTO accountDTO)
 		{
-			var user = await _userManager.FindByNameAsync(accountDTO.Login);
-			if (user == null || await _userManager.CheckPasswordAsync(user, accountDTO.Password))
+			try
 			{
-				return Unauthorized();
+				var user = await _userManager.FindByNameAsync(accountDTO.Login);
+				if (user == null || await _userManager.CheckPasswordAsync(user, accountDTO.Password))
+				{
+					return Unauthorized();
+				}
+				return Ok(new { token = _JWTService.GenerateJWTToken(user) });
 			}
-			return Ok(new { token = _JWTService.GenerateJWTToken(user) });
+			catch
+			{
+				return Problem("Error. Please contact to developer");
+			}
 		}
 	}
 }
