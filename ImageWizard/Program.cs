@@ -1,4 +1,5 @@
 using ImageWizard.Data.Contexts;
+using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
@@ -49,7 +50,8 @@ builder.Services.AddEndpointsApiExplorer()
 	.AddSingleton<IImagesFileWorkerService, ImagesFileWorkerService>()
 	.AddTransient<IImageService, ImageService>()
 	.AddTransient<IGetImageUrlService, GetImageUrlService>()
-	.AddTransient<IJWTService, JWTService>();
+	.AddTransient<IJWTService, JWTService>()
+	.AddScoped<ValidImageSizeActionFilterAttribute>();
 
 var app = builder.Build();
 

@@ -2,7 +2,6 @@
 using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
-using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImageWizard.Controllers
@@ -11,29 +10,23 @@ namespace ImageWizard.Controllers
 	[ApiController]
 	public class ImagesController : ControllerBase
 	{
-		private readonly IUploadFromUrlImageService _uploadFromUrlImageService;
 		private readonly IImageService _imageService;
 		private readonly IGetImageUrlService _getImageUrlService;
 
-		public ImagesController(IUploadFromUrlImageService uploadFromUrlImageService, IImageService imageService,
-			IGetImageUrlService getImageUrlService)
+		public ImagesController(IImageService imageService, IGetImageUrlService getImageUrlService)
 		{
-			_uploadFromUrlImageService = uploadFromUrlImageService;
 			_imageService = imageService;
 			_getImageUrlService = getImageUrlService;
 		}
 
 		[HttpPost]
-		[WellFormedUriStringActionFilter]
+		[WellFormedUriStringActionFilter(Order = int.MinValue)]
+		[ServiceFilter(typeof(ValidImageSizeActionFilterAttribute))]
 		public async Task<IActionResult> PostImage(ImageDTO imageDTO)
 		{
 			try
 			{
-				var imageBytes = await _uploadFromUrlImageService.GetImageBytesAsync(imageDTO); //Идея для рефакторинга - перенести проверку в сервис, а массив байт передавать через контекст или что-то в этом роде
-				if (imageBytes.Length > (5 * 1024 * 1024))
-				{
-					return UnprocessableEntity("The size of the image is bigger than 5MB");
-				}
+				var imageBytes = (byte[])HttpContext.Items["imageBytes"]!;
 				int id = await _imageService.SaveImageAsync(imageBytes);
 				return Ok(new { url = _getImageUrlService.GetImageUrl(id, Request.Scheme, Request.Host) });
 			}
