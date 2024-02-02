@@ -2,6 +2,7 @@
 using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 
 namespace ImageWizard.Controllers
@@ -12,11 +13,13 @@ namespace ImageWizard.Controllers
 	{
 		private readonly IImageService _imageService;
 		private readonly IGetImageUrlService _getImageUrlService;
+		private readonly UserManager<IdentityUser> _userManager;
 
-		public ImagesController(IImageService imageService, IGetImageUrlService getImageUrlService)
+		public ImagesController(IImageService imageService, IGetImageUrlService getImageUrlService, UserManager<IdentityUser> userManager)
 		{
 			_imageService = imageService;
 			_getImageUrlService = getImageUrlService;
+			_userManager = userManager;
 		}
 
 		[HttpPost]
