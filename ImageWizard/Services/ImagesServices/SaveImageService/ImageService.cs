@@ -96,9 +96,9 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			return await _context.ImageEntities.FindAsync(id);
 		}
 
-		public DbSet<ImageEntity> GetImageEntities()
+		public IQueryable<ImageEntity> GetImageEntities()
 		{
-			return _context.ImageEntities;
+			return _context.ImageEntities.AsQueryable();
 		}
 
 		private string GetNewImageDirectoryName()
