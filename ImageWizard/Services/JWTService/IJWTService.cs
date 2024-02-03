@@ -1,9 +1,10 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ImageWizard.Data.Entities;
+using Microsoft.AspNetCore.Identity;
 
 namespace ImageWizard.Services.JWTService
 {
 	public interface IJWTService
 	{
-		string GenerateJWTToken(IdentityUser user);
+		string GenerateJWTToken(User user);
 	}
 }

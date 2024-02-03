@@ -1,4 +1,5 @@
-﻿using ImageWizard.DTOs.AccountDTOs;
+﻿using ImageWizard.Data.Entities;
+using ImageWizard.DTOs.AccountDTOs;
 using ImageWizard.Services.JWTService;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
@@ -9,10 +10,10 @@ namespace ImageWizard.Controllers
 	[ApiController]
 	public class AccountController : ControllerBase
 	{
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<User> _userManager;
 		private readonly IJWTService _JWTService;
 
-		public AccountController(UserManager<IdentityUser> userManager, IJWTService JWTService)
+		public AccountController(UserManager<User> userManager, IJWTService JWTService)
 		{
 			_userManager = userManager;
 			_JWTService = JWTService;
@@ -24,7 +25,7 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var user = new IdentityUser
+				var user = new User
 				{
 					UserName = accountDTO.Login
 				};

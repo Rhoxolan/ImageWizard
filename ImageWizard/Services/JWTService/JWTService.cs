@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Identity;
+﻿using ImageWizard.Data.Entities;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
@@ -15,7 +16,7 @@ namespace ImageWizard.Services.JWTService
 			_configuration = configuration;
 		}
 
-		public string GenerateJWTToken(IdentityUser user)
+		public string GenerateJWTToken(User user)
 		{
 			var keyBytes = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
 			var tokenDescriptor = new SecurityTokenDescriptor

@@ -1,9 +1,13 @@
-﻿using ImageWizard.DTOs.ImagesDTOs;
+﻿using ImageWizard.Data.Entities;
+using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Security.Claims;
 
 namespace ImageWizard.Controllers
 {
@@ -13,9 +17,9 @@ namespace ImageWizard.Controllers
 	{
 		private readonly IImageService _imageService;
 		private readonly IGetImageUrlService _getImageUrlService;
-		private readonly UserManager<IdentityUser> _userManager;
+		private readonly UserManager<User> _userManager;
 
-		public ImagesController(IImageService imageService, IGetImageUrlService getImageUrlService, UserManager<IdentityUser> userManager)
+		public ImagesController(IImageService imageService, IGetImageUrlService getImageUrlService, UserManager<User> userManager)
 		{
 			_imageService = imageService;
 			_getImageUrlService = getImageUrlService;
@@ -96,11 +100,19 @@ namespace ImageWizard.Controllers
 		}
 
 		[HttpDelete("{id}")]
+		[Authorize]
 		public async Task<IActionResult> DeleteImage(int id)
 		{
 			try
 			{
-				var imageEntity = await _imageService.GetImageEntityAsync(id);
+				var userId = User.FindFirst(ClaimTypes.NameIdentifier);
+				if (userId == null)
+				{
+					return Unauthorized();
+				}
+				var imageEntity = await _imageService.GetImageEntities()
+					.Where(i => i.User.Id == userId.Value)
+					.FirstOrDefaultAsync(i => i.Id == id);
 				if (imageEntity == null)
 				{
 					return NotFound();

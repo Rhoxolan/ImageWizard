@@ -2,6 +2,7 @@
 using ImageWizard.Data.Entities;
 using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
+using Microsoft.EntityFrameworkCore;
 
 namespace ImageWizard.Services.ImagesServices.SaveImageService
 {
@@ -93,6 +94,11 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 		public async Task<ImageEntity?> GetImageEntityAsync(int id)
 		{
 			return await _context.ImageEntities.FindAsync(id);
+		}
+
+		public DbSet<ImageEntity> GetImageEntities()
+		{
+			return _context.ImageEntities;
 		}
 
 		private string GetNewImageDirectoryName()

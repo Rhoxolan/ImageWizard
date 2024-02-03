@@ -1,4 +1,5 @@
 using ImageWizard.Data.Contexts;
+using ImageWizard.Data.Entities;
 using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
@@ -22,7 +23,7 @@ builder.Services.AddCors(opt =>
 	opt.AddDefaultPolicy(builder =>
 	builder.AllowAnyOrigin().AllowAnyHeader().AllowAnyMethod()));
 
-builder.Services.AddIdentity<IdentityUser, IdentityRole>()
+builder.Services.AddIdentity<User, IdentityRole>()
 	.AddEntityFrameworkStores<ImagesContext>();
 
 builder.Services.AddAuthentication(opt =>

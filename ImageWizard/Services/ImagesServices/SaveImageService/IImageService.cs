@@ -1,5 +1,6 @@
 ﻿using ImageWizard.Data.Entities;
 using ImageWizard.DTOs.ImagesDTOs;
+using Microsoft.EntityFrameworkCore;
 
 namespace ImageWizard.Services.ImagesServices.SaveImageService
 {
@@ -12,6 +13,8 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 		Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size);
 
 		Task<ImageEntity?> GetImageEntityAsync(int id);
+
+		DbSet<ImageEntity> GetImageEntities();
 
 		Task DeleteImageAsync(ImageEntity imageEntity);
 	}
