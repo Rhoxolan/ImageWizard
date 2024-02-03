@@ -2,7 +2,6 @@
 using ImageWizard.Data.Entities;
 using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
-using Microsoft.EntityFrameworkCore;
 
 namespace ImageWizard.Services.ImagesServices.SaveImageService
 {
