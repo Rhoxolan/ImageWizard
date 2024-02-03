@@ -1,5 +1,4 @@
-﻿using ImageWizard.Data.Entities;
-using ImageWizard.DTOs.ImagesDTOs;
+﻿using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
