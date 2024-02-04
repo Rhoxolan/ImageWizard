@@ -5,15 +5,19 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 {
 	public interface IImageService
 	{
-		Task<int> SaveImageAsync(byte[] imageBytes);
+		Task<ImageEntity> SaveImageAsync(byte[] imageBytes);
+
+		Task<ImageEntity> SaveImageWithUserAsync(byte[] imageBytes, User user);
 
 		Task<LocalImageDTO?> GetLocalImageAsync(int id);
 
-		Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size);
+		Task<LocalImageDTO?> GetLocalImageByUserIdAsync(int id, string userId);
+
+		Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size, string userId);
+
+		Task<ImageEntity?> GetImageEntityByUserIdAsync(int id, string userId);
 
 		Task<ImageEntity?> GetImageEntityAsync(int id);
-
-		IQueryable<ImageEntity> GetImageEntities();
 
 		Task DeleteImageAsync(ImageEntity imageEntity);
 	}

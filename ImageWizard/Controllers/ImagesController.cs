@@ -1,8 +1,10 @@
-﻿using ImageWizard.DTOs.ImagesDTOs;
+﻿using ImageWizard.Data.Entities;
+using ImageWizard.DTOs.ImagesDTOs;
 using ImageWizard.Filters.ImagesFilters;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Security.Claims;
@@ -15,11 +17,13 @@ namespace ImageWizard.Controllers
 	{
 		private readonly IImageService _imageService;
 		private readonly IGetImageUrlService _getImageUrlService;
+		private readonly UserManager<User> _userManager;
 
-		public ImagesController(IImageService imageService, IGetImageUrlService getImageUrlService)
+		public ImagesController(IImageService imageService, IGetImageUrlService getImageUrlService, UserManager<User> userManager)
 		{
 			_imageService = imageService;
 			_getImageUrlService = getImageUrlService;
+			_userManager = userManager;
 		}
 
 		[HttpPost]
@@ -29,9 +33,26 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
+				ImageEntity image;
+				User? currentUser = null;
 				var imageBytes = (byte[])HttpContext.Items["imageBytes"]!;
-				int id = await _imageService.SaveImageAsync(imageBytes);
-				return Ok(new { url = _getImageUrlService.GetImageUrl(id, Request.Scheme, Request.Host) });
+				if (User.Identity != null && User.Identity.IsAuthenticated)
+				{
+					var userId = User.FindFirst(ClaimTypes.NameIdentifier);
+					if (userId != null)
+					{
+						currentUser = await _userManager.FindByIdAsync(userId.Value);
+					}
+				}
+				if (currentUser != null)
+				{
+					image = await _imageService.SaveImageWithUserAsync(imageBytes, currentUser);
+				}
+				else
+				{
+					image = await _imageService.SaveImageAsync(imageBytes);
+				}
+				return Ok(new { url = _getImageUrlService.GetImageUrl(image.Id, Request.Scheme, Request.Host) });
 			}
 			catch (UnknownImageFormatException)
 			{
@@ -48,7 +69,26 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var localImage = await _imageService.GetLocalImageAsync(id);
+				LocalImageDTO? localImage = null;
+				Claim? userId = null;
+				var image = await _imageService.GetImageEntityAsync(id);
+				if (image == null)
+				{
+					return NotFound();
+				}
+				if(image.User != null)
+				{
+					if (User.Identity == null || !User.Identity.IsAuthenticated)
+					{
+						return NotFound();
+					}
+					userId = User.FindFirst(ClaimTypes.NameIdentifier)!;
+					localImage = await _imageService.GetLocalImageByUserIdAsync(id, userId.Value);
+				}
+				else
+				{
+					localImage = await _imageService.GetLocalImageAsync(id);
+				}
 				if (localImage == null)
 				{
 					return NotFound();
@@ -70,11 +110,13 @@ namespace ImageWizard.Controllers
 		}
 
 		[HttpGet("{id}/size/{size:regex(^(100|300)$)}")]
+		[Authorize]
 		public async Task<IActionResult> GetImageThumbnail(int id, int size)
 		{
 			try
 			{
-				var localImageThumbnail = await _imageService.GetLocalImageThumbnailAsync(id, size);
+				var userId = User.FindFirst(ClaimTypes.NameIdentifier)!;
+				var localImageThumbnail = await _imageService.GetLocalImageThumbnailAsync(id, size, userId.Value);
 				if (localImageThumbnail == null)
 				{
 					return NotFound();
@@ -101,14 +143,8 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var userId = User.FindFirst(ClaimTypes.NameIdentifier);
-				if (userId == null)
-				{
-					return Unauthorized();
-				}
-				var imageEntity = await _imageService.GetImageEntities()
-					.Where(i => i.User.Id == userId.Value)
-					.FirstOrDefaultAsync(i => i.Id == id);
+				var userId = User.FindFirst(ClaimTypes.NameIdentifier)!;
+				var imageEntity = await _imageService.GetImageEntityByUserIdAsync(id, userId.Value);
 				if (imageEntity == null)
 				{
 					return NotFound();
