@@ -20,7 +20,6 @@ namespace ImageWizard.Controllers
 		}
 
 		[HttpPost("register")] //Идея для рефакторинга - подумать над тем, чтобы усложнить систему передачи пароля, мб как-то зашифровать передаваемый пароль
-		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Register(AccountDTO accountDTO)
 		{
 			try
@@ -43,7 +42,6 @@ namespace ImageWizard.Controllers
 		}
 
 		[HttpPost("login")]
-		[ValidateAntiForgeryToken]
 		public async Task<IActionResult> Login(AccountDTO accountDTO)
 		{
 			try
