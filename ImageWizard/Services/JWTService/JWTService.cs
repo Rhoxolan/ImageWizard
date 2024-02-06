@@ -18,7 +18,7 @@ namespace ImageWizard.Services.JWTService
 
 		public string GenerateJWTToken(User user)
 		{
-			var keyBytes = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]!);
+			var keyBytes = Encoding.UTF8.GetBytes(_configuration["Jwt:SecretKey"]!);
 			var tokenDescriptor = new SecurityTokenDescriptor
 			{
 				Subject = new ClaimsIdentity(new[]
