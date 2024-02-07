@@ -31,9 +31,10 @@ namespace ImageWizard.Controllers
 				var createResult = await _userManager.CreateAsync(user, accountDTO.Password);
 				if (!createResult.Succeeded)
 				{
-					return BadRequest(new { Errors = createResult.Errors });
+					return BadRequest(new { createResult.Errors });
 				}
-				return Ok(new { token = _JWTService.GenerateJWTToken(user) });
+				var token = _JWTService.GenerateJWTToken(user);
+				return Ok(new { token });
 			}
 			catch
 			{
@@ -47,11 +48,12 @@ namespace ImageWizard.Controllers
 			try
 			{
 				var user = await _userManager.FindByNameAsync(accountDTO.Login);
-				if (user == null || await _userManager.CheckPasswordAsync(user, accountDTO.Password))
+				if (user == null || !await _userManager.CheckPasswordAsync(user, accountDTO.Password))
 				{
 					return Unauthorized();
 				}
-				return Ok(new { token = _JWTService.GenerateJWTToken(user) });
+				var token = _JWTService.GenerateJWTToken(user);
+				return Ok(new { token });
 			}
 			catch
 			{
