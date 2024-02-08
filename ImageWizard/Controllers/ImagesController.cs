@@ -32,26 +32,30 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				ImageEntity image;
-				User? currentUser = null;
+				ImageEntity? image = null;
 				var imageBytes = (byte[])HttpContext.Items["imageBytes"]!;
 				if (User.Identity != null && User.Identity.IsAuthenticated)
 				{
 					var userId = User.FindFirst(ClaimTypes.NameIdentifier);
 					if (userId != null)
 					{
-						currentUser = await _userManager.FindByIdAsync(userId.Value);
+						var currentUser = await _userManager.FindByIdAsync(userId.Value);
+						if (currentUser != null)
+						{
+							image = await _imageService.SaveImageWithUserAsync(imageBytes, currentUser);
+						}
 					}
-				}
-				if (currentUser != null)
-				{
-					image = await _imageService.SaveImageWithUserAsync(imageBytes, currentUser);
 				}
 				else
 				{
 					image = await _imageService.SaveImageAsync(imageBytes);
 				}
-				return Ok(new { url = _getImageUrlService.GetImageUrl(image.Id, Request.Scheme, Request.Host) });
+				if (image == null)
+				{
+					return BadRequest();
+				}
+				var url = _getImageUrlService.GetImageUrl(image.Id, Request.Scheme, Request.Host);
+				return Ok(new { url });
 			}
 			catch (UnknownImageFormatException)
 			{
