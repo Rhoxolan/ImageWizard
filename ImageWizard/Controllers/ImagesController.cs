@@ -36,10 +36,10 @@ namespace ImageWizard.Controllers
 				var imageBytes = (byte[])HttpContext.Items["imageBytes"]!;
 				if (User.Identity != null && User.Identity.IsAuthenticated)
 				{
-					var userId = User.FindFirst(ClaimTypes.NameIdentifier);
-					if (userId != null)
+					var userNameValue = User.FindFirst(ClaimTypes.Name);
+					if (userNameValue != null)
 					{
-						var currentUser = await _userManager.FindByIdAsync(userId.Value);
+						var currentUser = await _userManager.FindByNameAsync(userNameValue.Value);
 						if (currentUser != null)
 						{
 							image = await _imageService.SaveImageWithUserAsync(imageBytes, currentUser);
@@ -73,7 +73,6 @@ namespace ImageWizard.Controllers
 			try
 			{
 				LocalImageDTO? localImage = null;
-				Claim? userId = null;
 				var image = await _imageService.GetImageEntityAsync(id);
 				if (image == null)
 				{
@@ -85,8 +84,12 @@ namespace ImageWizard.Controllers
 					{
 						return NotFound();
 					}
-					userId = User.FindFirst(ClaimTypes.NameIdentifier)!;
-					localImage = await _imageService.GetLocalImageByUserIdAsync(id, userId.Value);
+					var userNameClaim = User.FindFirst(ClaimTypes.Name);
+					if(userNameClaim == null)
+					{
+						return BadRequest();
+					}
+					localImage = await _imageService.GetLocalImageByUserIdAsync(id, userNameClaim.Value);
 				}
 				else
 				{
