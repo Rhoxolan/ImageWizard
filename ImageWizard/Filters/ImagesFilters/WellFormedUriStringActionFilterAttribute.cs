@@ -29,6 +29,7 @@ namespace ImageWizard.Filters.ImagesFilters
 			if (!Uri.IsWellFormedUriString(imageDTO.Url, UriKind.Absolute))
 			{
 				context.Result = new BadRequestObjectResult("Wrong URI");
+				return;
 			}
 			await next();
 		}

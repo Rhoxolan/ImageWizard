@@ -21,11 +21,9 @@ namespace ImageWizard.Filters.ImagesFilters
 			if (imageBytes.Length > (5 * 1024 * 1024))
 			{
 				context.Result = new UnprocessableEntityObjectResult("The size of the image is bigger than 5MB");
+				return;
 			}
-			else
-			{
-				context.HttpContext.Items["imageBytes"] = imageBytes;
-			}
+			context.HttpContext.Items["imageBytes"] = imageBytes;
 			await next();
 		}
 	}
