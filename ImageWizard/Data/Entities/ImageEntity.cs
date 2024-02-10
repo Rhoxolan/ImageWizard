@@ -6,6 +6,6 @@
 
 		public string Path { get; set; } = default!;
 
-		public User User { get; set; } = default!;
+		public User? User { get; set; } = default;
 	}
 }

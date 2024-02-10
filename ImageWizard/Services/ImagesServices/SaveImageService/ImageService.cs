@@ -17,22 +17,15 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			_context = context;
 		}
 
-		public async Task<ImageEntity> SaveImageAsync(byte[] imageBytes)
+		public async Task<ImageEntity> SaveImageAsync(byte[] imageBytes, User? user)
 		{
-			string imagePath = SaveImage(imageBytes);
-			ImageEntity imageEntity = new ImageEntity
-			{
-				Path = imagePath
-			};
-			_context.ImageEntities.Add(imageEntity);
-			await _context.SaveChangesAsync();
-			return imageEntity;
-		}
-
-		public async Task<ImageEntity> SaveImageWithUserAsync(byte[] imageBytes, User user)
-		{
-			string imagePath = SaveImage(imageBytes);
-			ImageEntity imageEntity = new ImageEntity
+			var format = Image.DetectFormat(imageBytes);
+			using Image image = Image.Load(imageBytes);
+			string imageDirectory = GetNewImageDirectoryName();
+			string imageName = $"{Guid.NewGuid()}.{format.Name.ToLower()}";
+			string imagePath = Path.Combine(imageDirectory, imageName);
+			_imagesFileWorkerService.SaveImage(imageDirectory, imagePath, image);
+			var imageEntity = new ImageEntity
 			{
 				Path = imagePath,
 				User = user
@@ -42,31 +35,20 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			return imageEntity;
 		}
 
-		private string SaveImage(byte[] imageBytes)
+		public async Task<LocalImageDTO?> GetLocalImageAsync(int id, User? user)
 		{
-			var format = Image.DetectFormat(imageBytes);
-			using Image image = Image.Load(imageBytes);
-			string imageDirectory = GetNewImageDirectoryName();
-			string imageName = $"{Guid.NewGuid()}.{format.Name.ToLower()}";
-			string imagePath = Path.Combine(imageDirectory, imageName);
-			_imagesFileWorkerService.SaveImage(imageDirectory, imagePath, image);
-			return imagePath;
-		}
-
-		public async Task<LocalImageDTO?> GetLocalImageAsync(int id)
-		{
-			var imageEntity = await _context.ImageEntities.FindAsync(id);
-			return GetImage(imageEntity);
-		}
-
-		public async Task<LocalImageDTO?> GetLocalImageByUserIdAsync(int id, string userId)
-		{
-			var imageEntity = await _context.ImageEntities.Where(i => i.User.Id == userId).FirstOrDefaultAsync(i => i.Id == id);
-			return GetImage(imageEntity);
-		}
-
-		private LocalImageDTO? GetImage(ImageEntity? imageEntity)
-		{
+			ImageEntity? imageEntity;
+			if (user != null)
+			{
+				imageEntity = await _context.ImageEntities
+					.Include(i => i.User)
+					.Where(i => i.User!.Id == user.Id)
+					.FirstOrDefaultAsync(i => i.Id == id);
+			}
+			else
+			{
+				imageEntity = await _context.ImageEntities.FindAsync(id);
+			}
 			if (imageEntity == null)
 			{
 				return null;
@@ -128,7 +110,7 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 
 		public async Task<ImageEntity?> GetImageEntityAsync(int id)
 		{
-			return await _context.ImageEntities.FindAsync(id);
+			return await _context.ImageEntities.Include(i => i.User).FirstOrDefaultAsync(i => i.Id == id);
 		}
 
 		private string GetNewImageDirectoryName()

@@ -32,28 +32,22 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				ImageEntity? image = null;
+				User? currentUser = null;
 				var imageBytes = (byte[])HttpContext.Items["imageBytes"]!;
-				if (User.Identity != null && User.Identity.IsAuthenticated)
+				if (User.Identity!.IsAuthenticated)
 				{
-					var userNameValue = User.FindFirst(ClaimTypes.Name);
-					if (userNameValue != null)
+					var userNameClaim = User.FindFirst(ClaimTypes.Name);
+					if (userNameClaim == null)
 					{
-						var currentUser = await _userManager.FindByNameAsync(userNameValue.Value);
-						if (currentUser != null)
-						{
-							image = await _imageService.SaveImageWithUserAsync(imageBytes, currentUser);
-						}
+						return BadRequest();
+					}
+					currentUser = await _userManager.FindByNameAsync(userNameClaim.Value);
+					if (currentUser == null)
+					{
+						return BadRequest();
 					}
 				}
-				else
-				{
-					image = await _imageService.SaveImageAsync(imageBytes);
-				}
-				if (image == null)
-				{
-					return BadRequest();
-				}
+				var image = await _imageService.SaveImageAsync(imageBytes, currentUser);
 				var url = _getImageUrlService.GetImageUrl(image.Id, Request.Scheme, Request.Host);
 				return Ok(new { url });
 			}
@@ -72,29 +66,30 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				LocalImageDTO? localImage = null;
+				User? user = null;
 				var image = await _imageService.GetImageEntityAsync(id);
 				if (image == null)
 				{
 					return NotFound();
 				}
-				if(image.User != null)
+				if (image.User != null)
 				{
 					if (User.Identity == null || !User.Identity.IsAuthenticated)
 					{
 						return NotFound();
 					}
 					var userNameClaim = User.FindFirst(ClaimTypes.Name);
-					if(userNameClaim == null)
+					if (userNameClaim == null)
 					{
 						return BadRequest();
 					}
-					localImage = await _imageService.GetLocalImageByUserIdAsync(id, userNameClaim.Value);
+					user = await _userManager.FindByNameAsync(userNameClaim.Value);
+					if (user == null)
+					{
+						return BadRequest();
+					}
 				}
-				else
-				{
-					localImage = await _imageService.GetLocalImageAsync(id);
-				}
+				var localImage = await _imageService.GetLocalImageAsync(id, user);
 				if (localImage == null)
 				{
 					return NotFound();
