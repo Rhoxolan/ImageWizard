@@ -61,9 +61,12 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			};
 		}
 
-		public async Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size, string userId)
+		public async Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size, User user)
 		{
-			var imageEntity = await _context.ImageEntities.Where(i => i.User.Id == userId).FirstOrDefaultAsync(i => i.Id == id);
+			var imageEntity = await _context.ImageEntities
+					.Include(i => i.User)
+					.Where(i => i.User!.Id == user.Id)
+					.FirstOrDefaultAsync(i => i.Id == id);
 			if (imageEntity == null)
 			{
 				return null;
@@ -103,9 +106,12 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			await _context.SaveChangesAsync();
 		}
 
-		public async Task<ImageEntity?> GetImageEntityByUserIdAsync(int id, string userId)
+		public async Task<ImageEntity?> GetImageEntityByUserAsync(int id, User user)
 		{
-			return await _context.ImageEntities.Where(i => i.User.Id == userId).FirstOrDefaultAsync(i => i.Id == id);
+			return await _context.ImageEntities
+					.Include(i => i.User)
+					.Where(i => i.User!.Id == user.Id)
+					.FirstOrDefaultAsync(i => i.Id == id);
 		}
 
 		public async Task<ImageEntity?> GetImageEntityAsync(int id)

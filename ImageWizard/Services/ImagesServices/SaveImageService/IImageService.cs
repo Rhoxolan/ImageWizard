@@ -9,9 +9,9 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 
 		Task<LocalImageDTO?> GetLocalImageAsync(int id, User? user);
 
-		Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size, string userId);
+		Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size, User user);
 
-		Task<ImageEntity?> GetImageEntityByUserIdAsync(int id, string userId);
+		Task<ImageEntity?> GetImageEntityByUserAsync(int id, User user);
 
 		Task<ImageEntity?> GetImageEntityAsync(int id);
 

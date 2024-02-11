@@ -116,8 +116,17 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var userId = User.FindFirst(ClaimTypes.NameIdentifier)!;
-				var localImageThumbnail = await _imageService.GetLocalImageThumbnailAsync(id, size, userId.Value);
+				var userNameClaim = User.FindFirst(ClaimTypes.Name);
+				if (userNameClaim == null)
+				{
+					return BadRequest();
+				}
+				var user = await _userManager.FindByNameAsync(userNameClaim.Value);
+				if (user == null)
+				{
+					return BadRequest();
+				}
+				var localImageThumbnail = await _imageService.GetLocalImageThumbnailAsync(id, size, user);
 				if (localImageThumbnail == null)
 				{
 					return NotFound();
@@ -144,8 +153,17 @@ namespace ImageWizard.Controllers
 		{
 			try
 			{
-				var userId = User.FindFirst(ClaimTypes.NameIdentifier)!;
-				var imageEntity = await _imageService.GetImageEntityByUserIdAsync(id, userId.Value);
+				var userNameClaim = User.FindFirst(ClaimTypes.Name);
+				if (userNameClaim == null)
+				{
+					return BadRequest();
+				}
+				var user = await _userManager.FindByNameAsync(userNameClaim.Value);
+				if (user == null)
+				{
+					return BadRequest();
+				}
+				var imageEntity = await _imageService.GetImageEntityByUserAsync(id, user);
 				if (imageEntity == null)
 				{
 					return NotFound();
