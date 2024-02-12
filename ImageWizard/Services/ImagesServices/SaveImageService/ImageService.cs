@@ -40,14 +40,11 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 			ImageEntity? imageEntity;
 			if (user != null)
 			{
-				imageEntity = await _context.ImageEntities
-					.Include(i => i.User)
-					.Where(i => i.User!.Id == user.Id)
-					.FirstOrDefaultAsync(i => i.Id == id);
+				imageEntity = await GetImageEntityByUserAsync_internal(id, user);
 			}
 			else
 			{
-				imageEntity = await _context.ImageEntities.FindAsync(id);
+				imageEntity = await GetImageEntityAsync_internal(id);
 			}
 			if (imageEntity == null)
 			{
@@ -63,10 +60,7 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 
 		public async Task<LocalImageDTO?> GetLocalImageThumbnailAsync(int id, int size, User user)
 		{
-			var imageEntity = await _context.ImageEntities
-					.Include(i => i.User)
-					.Where(i => i.User!.Id == user.Id)
-					.FirstOrDefaultAsync(i => i.Id == id);
+			var imageEntity = await GetImageEntityByUserAsync_internal(id, user);
 			if (imageEntity == null)
 			{
 				return null;
@@ -108,15 +102,27 @@ namespace ImageWizard.Services.ImagesServices.SaveImageService
 
 		public async Task<ImageEntity?> GetImageEntityByUserAsync(int id, User user)
 		{
+			return await GetImageEntityByUserAsync_internal(id, user);
+		}
+
+		public async Task<ImageEntity?> GetImageEntityAsync(int id)
+		{
+			return await GetImageEntityAsync_internal(id);
+		}
+
+		private async Task<ImageEntity?> GetImageEntityByUserAsync_internal(int id, User user)
+		{
 			return await _context.ImageEntities
 					.Include(i => i.User)
 					.Where(i => i.User!.Id == user.Id)
 					.FirstOrDefaultAsync(i => i.Id == id);
 		}
 
-		public async Task<ImageEntity?> GetImageEntityAsync(int id)
+		private async Task<ImageEntity?> GetImageEntityAsync_internal(int id)
 		{
-			return await _context.ImageEntities.Include(i => i.User).FirstOrDefaultAsync(i => i.Id == id);
+			return await _context.ImageEntities
+				.Include(i => i.User)
+				.FirstOrDefaultAsync(i => i.Id == id);
 		}
 
 		private string GetNewImageDirectoryName()
