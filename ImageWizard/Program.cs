@@ -6,6 +6,7 @@ using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
 using ImageWizard.Services.ImagesServices.UploadFromUrlImageService;
 using ImageWizard.Services.JWTService;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -64,6 +65,23 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
+
+app.Use(async (context, next) =>
+{
+	if(context.Request.Path.Value == "/api/images" && context.Request.Method.ToUpper() == "POST"
+	&& !string.IsNullOrEmpty(context.Request.Headers["Authorization"]))
+	{
+		var authResult = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
+		if (!authResult.Succeeded)
+		{
+			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
+			return;
+		}
+	}
+
+	await next();
+});
+
 app.UseAuthorization();
 app.UseCors();
 
