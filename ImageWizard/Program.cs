@@ -1,6 +1,7 @@
 using ImageWizard.Data.Contexts;
 using ImageWizard.Data.Entities;
 using ImageWizard.Filters.ImagesFilters;
+using ImageWizard.Middlewares;
 using ImageWizard.Services.ImagesServices.GetImageUrlService;
 using ImageWizard.Services.ImagesServices.ImagesFileWorkerService;
 using ImageWizard.Services.ImagesServices.SaveImageService;
@@ -66,26 +67,7 @@ if (app.Environment.IsDevelopment())
 app.UseHttpsRedirection();
 app.UseAuthentication();
 
-app.Use(async (context, next) =>
-{
-	bool isPostImages = context.Request.Path.Value == "/api/images" && context.Request.Method.ToUpper() == "POST";
-	bool isGetImages = context.Request.Path.Value!.StartsWith("/api/images/") && context.Request.Method.ToUpper() == "GET";
-	bool isContainsAuthHeader = !string.IsNullOrEmpty(context.Request.Headers["Authorization"]);
-
-	if (isContainsAuthHeader && (isPostImages || isGetImages))
-	{
-		var authResult = await context.AuthenticateAsync(JwtBearerDefaults.AuthenticationScheme);
-		if (!authResult.Succeeded)
-		{
-			context.Response.StatusCode = StatusCodes.Status401Unauthorized;
-			context.Response.Headers.AccessControlAllowOrigin = "*";
-			context.Response.Headers.ContentType = "application/problem+json; charset=utf-8";
-			return;
-		}
-	}
-
-	await next();
-});
+app.UseMiddleware<ImagesProcessingAccessMiddleware>();
 
 app.UseAuthorization();
 app.UseCors();
